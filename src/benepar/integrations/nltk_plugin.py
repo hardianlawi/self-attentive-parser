@@ -135,7 +135,7 @@ class Parser:
     >>> parser.parse('"Fly safely."')  # For debugging/interactive use only.
     """
 
-    def __init__(self, name, batch_size=64, language_code=None):
+    def __init__(self, name, language_code=None):
         """Load a trained parser model.
 
         Args:
@@ -155,8 +155,6 @@ class Parser:
             self._language_code = guess_language(self._parser.config["label_vocab"])
         self._tokenizer_lang = TOKENIZER_LOOKUP.get(self._language_code, None)
 
-        self.batch_size = batch_size
-
     def parse(self, sentence):
         """Parse a single sentence
 
@@ -174,7 +172,7 @@ class Parser:
         """
         return list(self.parse_sents([sentence]))[0]
 
-    def parse_sents(self, sents):
+    def parse_sents(self, sents, batch_size=64):
         """Parse multiple sentences in batches.
 
         Args:
@@ -201,7 +199,7 @@ class Parser:
 
         end_sentinel = object()
         for batch_sents in itertools.zip_longest(
-            *([iter(sents)] * self.batch_size), fillvalue=end_sentinel
+            *([iter(sents)] * batch_size), fillvalue=end_sentinel
         ):
             batch_inputs = []
             for sent in batch_sents:
