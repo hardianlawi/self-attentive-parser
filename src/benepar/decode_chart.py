@@ -165,7 +165,7 @@ class ChartDecoder:
         scores = scores - scores[..., :1]
         if self.force_root_constituent:
             scores[torch.arange(scores.shape[0]), 0, lengths - 1, 0] -= 1e9
-        dist = torch_struct.TreeCRF(scores, lengths=lengths, args={}, validate_args=False)
+        dist = torch_struct.TreeCRF(scores, lengths=lengths, args={})
         amax = dist.argmax
         amax[..., 0] += 1e-9
         padded_charts = amax.argmax(-1)
@@ -274,7 +274,7 @@ class SpanClassificationMarginLoss(nn.Module):
         augment = (1 - gold_event).to(torch.float)
         if self.force_root_constituent:
             augment[torch.arange(augment.shape[0]), 0, lengths - 1, 0] -= 1e9
-        dist = torch_struct.TreeCRF(logits + augment, lengths=lengths, args={}, validate_args=False)
+        dist = torch_struct.TreeCRF(logits + augment, lengths=lengths, args={})
 
         pred_score = dist.max
         gold_score = (logits * gold_event).sum((1, 2, 3))
